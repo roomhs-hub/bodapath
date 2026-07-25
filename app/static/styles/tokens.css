@@ -1,0 +1,51 @@
+:root {
+  /* Color — Brand (PPT 스타일가이드 §3과 동일) */
+  --color-primary: #1C60EF;
+  --color-primary-dark: #1244BD;
+  --color-primary-soft: #DBE8FE;
+
+  /* Color — Neutral */
+  --color-bg: #FFFFFF;
+  --color-surface: #F4F7FE;
+  --color-border: #E4EAFA;
+  --color-text: #1B2236;
+  --color-text-muted: #667085;
+
+  /* Color — Status (웹 전용 확장) */
+  --color-success: #2E7D32;
+  --color-warning: #B76E00;
+  --color-danger: #C62828;
+
+  /* Typography */
+  --font-heading: "KIMM Bold", "Nanum Gothic", -apple-system, sans-serif;
+  --font-body: "Nanum Gothic", -apple-system, sans-serif;
+  --font-body-light: "Nanum Gothic Light", "Nanum Gothic", sans-serif;
+  --font-size-display: 2rem;
+  --font-size-h1: 1.375rem;
+  --font-size-h2: 1.125rem;
+  --font-size-base: 1rem;
+  --font-size-caption: 0.8125rem;
+  --line-height-base: 1.5;
+
+  /* Spacing (4px 배수) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  /* Radius / Shadow (PPT 카드 스타일과 동일) */
+  --radius-base: 8px;
+  --radius-sm: 6px;
+  --shadow-card: 0 4px 14px rgba(28, 96, 239, 0.10);
+  --shadow-sm: 0 1px 2px rgba(27, 34, 54, 0.08);
+
+  /* Breakpoints (참고용, 미디어 쿼리에는 직접 px 입력) */
+  --bp-tablet: 768px;
+  --bp-desktop: 1024px;
+}
+
+@media (min-width: 1024px) {
+  :root { --font-size-display: 2.5rem; --font-size-h1: 1.75rem; }
+}

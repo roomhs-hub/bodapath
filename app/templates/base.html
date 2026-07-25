@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>{% block title %}업무 인수인계{% endblock %} · 업무 인수인계</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/tokens.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/base.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/components.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles/site.css') }}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  {% if session.get('logged_in') %}
+  <header class="topbar">
+    <a class="brand" href="{{ url_for('items.list_items') }}">업무 인수인계</a>
+    <nav>
+      <a href="{{ url_for('items.new_item') }}">입력</a>
+      <a href="{{ url_for('items.list_items') }}">리스트</a>
+      <a href="{{ url_for('search.search') }}">통합검색</a>
+      <a href="{{ url_for('admin.dashboard') }}">관리자</a>
+      <a href="{{ url_for('auth.logout') }}">로그아웃</a>
+    </nav>
+  </header>
+  {% endif %}
+
+  <main class="container">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="flash">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  {% if session.get('logged_in') %}
+  <nav class="bottom-tabbar">
+    <a href="{{ url_for('items.new_item') }}" class="{{ 'is-active' if request.endpoint == 'items.new_item' }}">입력</a>
+    <a href="{{ url_for('items.list_items') }}" class="{{ 'is-active' if request.endpoint == 'items.list_items' }}">리스트</a>
+    <a href="{{ url_for('search.search') }}" class="{{ 'is-active' if request.endpoint == 'search.search' }}">검색</a>
+    <a href="{{ url_for('admin.dashboard') }}" class="{{ 'is-active' if request.blueprint == 'admin' }}">관리자</a>
+  </nav>
+  {% endif %}
+</body>
+</html>

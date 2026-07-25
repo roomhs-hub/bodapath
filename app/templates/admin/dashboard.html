@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}관리자{% endblock %}
+{% block content %}
+<h1>관리자</h1>
+
+<div class="card">
+  <h2>현황 요약</h2>
+  <p>전체 건수: <strong>{{ total }}</strong></p>
+
+  <p class="caption">카테고리별 건수</p>
+  <div class="row">
+    {% for name, count in category_counts %}
+      <span class="filter-chip">{{ name or '(미지정)' }} {{ count }}</span>
+    {% endfor %}
+  </div>
+
+  <p class="caption" style="margin-top: var(--space-3);">관련자(부서)별 건수</p>
+  <div class="row">
+    {% for name, count in department_counts %}
+      <span class="filter-chip">{{ name }} {{ count }}</span>
+    {% endfor %}
+  </div>
+
+  <p class="caption" style="margin-top: var(--space-3);">진행상태별 건수</p>
+  <div class="row">
+    {% for name, count in status_counts %}
+      <span class="filter-chip">{{ name }} {{ count }}</span>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="card">
+  <h2>필드 관리</h2>
+  <p class="caption">항목 사용/미사용, 필수 여부, 순서, 신규 필드 추가를 관리합니다.</p>
+  <a href="{{ url_for('admin.fields') }}" class="btn btn-primary">필드 관리로 이동</a>
+</div>
+
+<div class="card">
+  <h2>데이터 백업</h2>
+  <p class="caption">전체 인수인계 항목을 CSV로 내보냅니다.</p>
+  <a href="{{ url_for('admin.export_csv') }}" class="btn btn-secondary">CSV 다운로드</a>
+</div>
+{% endblock %}

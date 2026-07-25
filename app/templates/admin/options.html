@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}선택항목 관리{% endblock %}
+{% block content %}
+<h1>{{ field.label }} — 선택항목 관리</h1>
+<p><a href="{{ url_for('admin.fields') }}">&larr; 필드 관리로 돌아가기</a></p>
+
+<div class="card">
+  {% for opt in options %}
+  <div class="row" style="align-items:center; margin-bottom: var(--space-2);">
+    <div style="flex:2;">{{ opt.value }}</div>
+    <form method="post" action="{{ url_for('admin.delete_option', field_key=field.field_key, option_id=opt.id) }}" onsubmit="return confirm('삭제하시겠습니까?');">
+      <button type="submit" class="btn btn-danger btn-sm">삭제</button>
+    </form>
+  </div>
+  {% else %}
+  <p class="caption">등록된 선택항목이 없습니다.</p>
+  {% endfor %}
+</div>
+
+<div class="card">
+  <h2>+ 선택항목 추가</h2>
+  <form method="post" action="{{ url_for('admin.new_option', field_key=field.field_key) }}" class="row">
+    <input type="text" name="value" placeholder="예: 신규항목" required>
+    <button type="submit" class="btn btn-primary">추가</button>
+  </form>
+</div>
+{% endblock %}

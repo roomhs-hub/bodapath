@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}{{ '수정' if mode == 'edit' else '입력' }}{% endblock %}
+{% block content %}
+<h1>{{ '업무 수정' if mode == 'edit' else '업무 등록' }}</h1>
+
+<form method="post" class="stack">
+  {% for field in fields %}
+  <div class="field">
+    <label for="f_{{ field.field_key }}">
+      {{ field.label }}{% if field.is_required %}<span class="required">*</span>{% endif %}
+    </label>
+
+    {% if field.field_type == 'textarea' %}
+      <textarea id="f_{{ field.field_key }}" name="{{ field.field_key }}">{{ form_values.get(field.field_key, '') }}</textarea>
+
+    {% elif field.field_type == 'date' %}
+      <input type="date" id="f_{{ field.field_key }}" name="{{ field.field_key }}" value="{{ form_values.get(field.field_key, '') }}">
+
+    {% elif field.field_type == 'select' %}
+      <select id="f_{{ field.field_key }}" name="{{ field.field_key }}">
+        <option value="">선택하세요</option>
+        {% for opt in field_options(field.field_key) %}
+          <option value="{{ opt.value }}" {{ 'selected' if form_values.get(field.field_key, '') == opt.value }}>{{ opt.value }}</option>
+        {% endfor %}
+      </select>
+
+    {% elif field.field_type == 'multiselect' %}
+      <div class="checkbox-group">
+        {% set selected = multiselect_values.get(field.field_key, []) %}
+        {% for opt in field_options(field.field_key) %}
+          <label>
+            <input type="checkbox" name="{{ field.field_key }}" value="{{ opt.value }}" {{ 'checked' if opt.value in selected }}>
+            <span>{{ opt.value }}</span>
+          </label>
+        {% endfor %}
+      </div>
+
+    {% else %}
+      <input type="text" id="f_{{ field.field_key }}" name="{{ field.field_key }}" value="{{ form_values.get(field.field_key, '') }}">
+    {% endif %}
+  </div>
+  {% endfor %}
+
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">{{ '저장' if mode == 'edit' else '등록' }}</button>
+    <a href="{{ url_for('items.list_items') }}" class="btn btn-secondary">취소</a>
+  </div>
+</form>
+{% endblock %}

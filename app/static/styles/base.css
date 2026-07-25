@@ -1,0 +1,59 @@
+@font-face {
+  font-family: "KIMM Bold";
+  src: url("../fonts/KIMM_bold.ttf") format("truetype");
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Nanum Gothic";
+  src: url("../fonts/NanumGothic.ttf") format("truetype");
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Nanum Gothic";
+  src: url("../fonts/NanumGothicBold.ttf") format("truetype");
+  font-weight: 700;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Nanum Gothic Light";
+  src: url("../fonts/NanumGothicLight.ttf") format("truetype");
+  font-weight: 300;
+  font-display: swap;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-base);
+  color: var(--color-text);
+  background: var(--color-surface);
+  padding-bottom: 64px; /* 모바일 하단 탭바 공간 */
+}
+
+h1, h2, .heading { font-family: var(--font-heading); color: var(--color-text); margin: 0 0 var(--space-3); }
+h1 { font-size: var(--font-size-h1); }
+h2 { font-size: var(--font-size-h2); }
+.caption { font-size: var(--font-size-caption); color: var(--color-text-muted); font-family: var(--font-body-light); }
+
+a { color: var(--color-primary); }
+
+input, select, textarea, button {
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: var(--space-4);
+}
+
+@media (min-width: 1024px) {
+  body { padding-bottom: 0; }
+  .container { max-width: 960px; padding: var(--space-5); }
+}

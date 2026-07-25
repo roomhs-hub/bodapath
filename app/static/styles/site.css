@@ -1,0 +1,11 @@
+/* 업무인수인계 시스템 전용 커스텀(최소화) */
+
+.login-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+}
+.login-card { width: 100%; max-width: 360px; text-align: center; }
+.login-card h1 { margin-bottom: var(--space-5); }

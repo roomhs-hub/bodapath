@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}통합검색{% endblock %}
+{% block content %}
+<h1>통합검색</h1>
+
+<div class="search-sticky">
+  <form method="get" class="stack">
+    <div class="field" style="margin-bottom:0;">
+      <input type="text" name="q" placeholder="업무명·업무내용·특이사항·문의처 검색" value="{{ keyword }}">
+    </div>
+
+    <details class="filter-accordion">
+      <summary>상세 필터</summary>
+      <div class="filter-body stack">
+        <div class="field" style="margin-bottom:0;">
+          <label>카테고리</label>
+          <div class="checkbox-group">
+            {% for opt in category_options %}
+              <label><input type="checkbox" name="category" value="{{ opt.value }}" {{ 'checked' if opt.value in selected_category }}><span>{{ opt.value }}</span></label>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label>주기</label>
+          <div class="checkbox-group">
+            {% for opt in cycle_options %}
+              <label><input type="checkbox" name="cycle" value="{{ opt.value }}" {{ 'checked' if opt.value in selected_cycle }}><span>{{ opt.value }}</span></label>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label>중요도</label>
+          <div class="checkbox-group">
+            {% for opt in priority_options %}
+              <label><input type="checkbox" name="priority" value="{{ opt.value }}" {{ 'checked' if opt.value in selected_priority }}><span>{{ opt.value }}</span></label>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label>진행상태</label>
+          <div class="checkbox-group">
+            {% for opt in status_options %}
+              <label><input type="checkbox" name="status" value="{{ opt.value }}" {{ 'checked' if opt.value in selected_status }}><span>{{ opt.value }}</span></label>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label>관련자(부서)</label>
+          <div class="checkbox-group">
+            {% for opt in department_options %}
+              <label><input type="checkbox" name="department" value="{{ opt.value }}" {{ 'checked' if opt.value in selected_departments }}><span>{{ opt.value }}</span></label>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label>이후 업무자</label>
+          <input type="text" name="next_owner" value="{{ next_owner }}">
+        </div>
+      </div>
+    </details>
+
+    <button type="submit" class="btn btn-primary btn-block">검색</button>
+  </form>
+</div>
+
+{% if searched %}
+  {% if results %}
+    <p class="caption" style="margin-top: var(--space-4);">검색 결과 {{ results|length }}건</p>
+
+    <table class="data-table">
+      <thead>
+        <tr><th>업무명</th><th>카테고리</th><th>관련자(부서)</th><th>주기</th><th>이후 업무자</th><th>진행상태</th></tr>
+      </thead>
+      <tbody>
+        {% for item in results %}
+        <tr>
+          <td><a href="{{ url_for('items.edit_item', item_id=item.id) }}">{{ item.title }}</a></td>
+          <td>{{ item.category or '' }}</td>
+          <td>{{ item.department_list|join(', ') }}</td>
+          <td>{{ item.cycle }}</td>
+          <td>{{ item.next_owner }}</td>
+          <td>{{ item.status }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <div class="list-card">
+      {% for item in results %}
+      <a class="list-card-item" href="{{ url_for('items.edit_item', item_id=item.id) }}">
+        <div class="title">{{ item.title }}</div>
+        <div class="meta">{{ item.category or '' }} · {{ item.department_list|join(', ') }} · {{ item.cycle }}</div>
+        <div class="meta">이후 업무자: {{ item.next_owner }} · {{ item.status }}</div>
+      </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">검색 결과가 없습니다.</div>
+  {% endif %}
+{% endif %}
+{% endblock %}

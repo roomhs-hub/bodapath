@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}리스트{% endblock %}
+{% block content %}
+<h1>인수인계 리스트</h1>
+
+<details class="filter-accordion">
+  <summary>필터</summary>
+  <div class="filter-body">
+    <form method="get" class="stack">
+      <div class="row">
+        <div class="field" style="margin-bottom:0;">
+          <label>카테고리</label>
+          <select name="category">
+            <option value="">전체</option>
+            {% for opt in category_options %}
+              <option value="{{ opt.value }}" {{ 'selected' if selected_category == opt.value }}>{{ opt.value }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label>진행상태</label>
+          <select name="status">
+            <option value="">전체</option>
+            {% for opt in status_options %}
+              <option value="{{ opt.value }}" {{ 'selected' if selected_status == opt.value }}>{{ opt.value }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:0;">
+        <label>관련자(부서)</label>
+        <div class="checkbox-group">
+          {% for opt in department_options %}
+            <label>
+              <input type="checkbox" name="department" value="{{ opt.value }}" {{ 'checked' if opt.value in selected_departments }}>
+              <span>{{ opt.value }}</span>
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="form-actions" style="margin-top: var(--space-3);">
+        <button type="submit" class="btn btn-primary btn-sm">필터 적용</button>
+        <a href="{{ url_for('items.list_items') }}" class="btn btn-secondary btn-sm">초기화</a>
+      </div>
+    </form>
+  </div>
+</details>
+
+{% if items %}
+<!-- 데스크톱: 표 -->
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>업무명</th><th>카테고리</th><th>관련자(부서)</th><th>주기</th><th>이후 업무자</th><th>진행상태</th><th>최근 수정일</th><th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in items %}
+    <tr>
+      <td><a href="{{ url_for('items.edit_item', item_id=item.id) }}">{{ item.title }}</a></td>
+      <td>{{ item.category or '' }}</td>
+      <td>{{ item.department_list|join(', ') }}</td>
+      <td>{{ item.cycle }}</td>
+      <td>{{ item.next_owner }}</td>
+      <td>{{ item.status }}</td>
+      <td>{{ item.updated_at|dt }}</td>
+      <td>
+        <form method="post" action="{{ url_for('items.delete_item', item_id=item.id) }}" onsubmit="return confirm('정말 삭제하시겠습니까?');">
+          <button type="submit" class="btn btn-danger btn-sm">삭제</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- 모바일: 카드형 리스트 -->
+<div class="list-card">
+  {% for item in items %}
+  <a class="list-card-item" href="{{ url_for('items.edit_item', item_id=item.id) }}">
+    <div class="title">{{ item.title }}</div>
+    <div class="meta">{{ item.category or '' }} · {{ item.department_list|join(', ') }} · {{ item.cycle }}</div>
+    <div class="meta">이후 업무자: {{ item.next_owner }} · <span class="badge {{ 'badge--done' if item.status == '완료' else ('badge--in-progress' if item.status == '확인중' else 'badge--todo') }}">{{ item.status }}</span></div>
+  </a>
+  {% endfor %}
+</div>
+
+<div class="pagination">
+  {% if pagination.has_prev %}
+    <a href="{{ url_for('items.list_items', page=pagination.prev_num, category=selected_category, status=selected_status, department=selected_departments) }}">이전</a>
+  {% endif %}
+  <span class="is-active">{{ pagination.page }} / {{ pagination.pages }}</span>
+  {% if pagination.has_next %}
+    <a href="{{ url_for('items.list_items', page=pagination.next_num, category=selected_category, status=selected_status, department=selected_departments) }}">다음</a>
+  {% endif %}
+</div>
+{% else %}
+<div class="empty-state">등록된 인수인계 항목이 없습니다.</div>
+{% endif %}
+{% endblock %}

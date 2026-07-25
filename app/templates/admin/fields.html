@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}필드 관리{% endblock %}
+{% block content %}
+<h1>필드 관리</h1>
+<p class="caption">사용/미사용 토글, 필수 여부, 순서를 관리하고 새 필드를 추가할 수 있습니다.</p>
+
+{% for field in fields %}
+<div class="card">
+  <div class="row" style="align-items:center;">
+    <div style="flex: 2; min-width: 160px;">
+      <strong>{{ field.label }}</strong>
+      <div class="caption">{{ field.field_key }} · {{ field_type_labels.get(field.field_type, field.field_type) }}{% if field.is_custom %} · 커스텀{% endif %}</div>
+    </div>
+
+    <form method="post" action="{{ url_for('admin.move_field', field_key=field.field_key, direction='up') }}">
+      <button type="submit" class="btn btn-secondary btn-sm">▲</button>
+    </form>
+    <form method="post" action="{{ url_for('admin.move_field', field_key=field.field_key, direction='down') }}">
+      <button type="submit" class="btn btn-secondary btn-sm">▼</button>
+    </form>
+
+    <form method="post" action="{{ url_for('admin.toggle_required', field_key=field.field_key) }}">
+      <button type="submit" class="btn {{ 'btn-primary' if field.is_required else 'btn-secondary' }} btn-sm">필수: {{ '예' if field.is_required else '아니오' }}</button>
+    </form>
+
+    <form method="post" action="{{ url_for('admin.toggle_enabled', field_key=field.field_key) }}">
+      <button type="submit" class="btn {{ 'btn-primary' if field.is_enabled else 'btn-secondary' }} btn-sm">사용: {{ '함' if field.is_enabled else '안함' }}</button>
+    </form>
+
+    {% if field.field_type in ('select', 'multiselect') %}
+      <a href="{{ url_for('admin.options', field_key=field.field_key) }}" class="btn btn-secondary btn-sm">선택항목 관리</a>
+    {% endif %}
+
+    {% if field.is_custom %}
+      <form method="post" action="{{ url_for('admin.delete_field', field_key=field.field_key) }}" onsubmit="return confirm('이 필드를 삭제하면 저장된 값도 함께 사라집니다. 계속할까요?');">
+        <button type="submit" class="btn btn-danger btn-sm">삭제</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+{% endfor %}
+
+<div class="card">
+  <h2>+ 필드 추가</h2>
+  <form method="post" action="{{ url_for('admin.new_field') }}" class="stack">
+    <div class="field">
+      <label>필드명</label>
+      <input type="text" name="label" required>
+    </div>
+    <div class="field">
+      <label>타입</label>
+      <select name="field_type">
+        {% for value, label in field_types %}
+          <option value="{{ value }}">{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="field">
+      <label>선택항목 (드롭다운/다중선택인 경우, 쉼표로 구분)</label>
+      <input type="text" name="options" placeholder="예: 항목1, 항목2, 항목3">
+    </div>
+    <div class="field">
+      <label><input type="checkbox" name="is_required" style="width:auto; min-height:auto;"> 필수 항목으로 지정</label>
+    </div>
+    <button type="submit" class="btn btn-primary">필드 추가</button>
+  </form>
+</div>
+{% endblock %}
