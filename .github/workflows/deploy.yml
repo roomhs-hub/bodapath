@@ -23,6 +23,7 @@ jobs:
             export PATH="/usr/local/bin:/usr/local/sbin:/usr/syno/bin:/var/packages/ContainerManager/target/usr/bin:/var/packages/Docker/target/usr/bin:/var/packages/Git/target/usr/bin:$PATH"
             REPO_URL="https://github.com/roomhs-hub/bodapath.git"
             DEPLOY_PATH="${{ secrets.NAS_DEPLOY_PATH }}"
+            git config --global --add safe.directory "$DEPLOY_PATH"
             if [ -d "$DEPLOY_PATH/.git" ]; then
               cd "$DEPLOY_PATH"
               git pull
