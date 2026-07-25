@@ -11,11 +11,14 @@ jobs:
     steps:
       - name: SSH deploy (clone-or-pull + write .env + docker compose up -d --build)
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          ENV_FILE_CONTENT: ${{ secrets.ENV_FILE }}
         with:
           host: ${{ secrets.NAS_HOST }}
           port: ${{ secrets.NAS_PORT }}
           username: ${{ secrets.NAS_USER }}
           key: ${{ secrets.NAS_SSH_KEY }}
+          envs: ENV_FILE_CONTENT
           script: |
             export PATH="/usr/local/bin:/usr/local/sbin:/usr/syno/bin:/var/packages/ContainerManager/target/usr/bin:/var/packages/Docker/target/usr/bin:/var/packages/Git/target/usr/bin:$PATH"
             REPO_URL="https://github.com/roomhs-hub/bodapath.git"
@@ -28,7 +31,5 @@ jobs:
               git clone "$REPO_URL" "$DEPLOY_PATH"
               cd "$DEPLOY_PATH"
             fi
-            cat > "$DEPLOY_PATH/.env" << 'ENVEOF'
-${{ secrets.ENV_FILE }}
-ENVEOF
+            printf '%s' "$ENV_FILE_CONTENT" > "$DEPLOY_PATH/.env"
             docker compose up -d --build
