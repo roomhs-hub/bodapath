@@ -33,4 +33,4 @@ jobs:
               cd "$DEPLOY_PATH"
             fi
             printf '%s' "$ENV_FILE_CONTENT" > "$DEPLOY_PATH/.env"
-            docker compose up -d --build
+            sudo docker compose up -d --build
