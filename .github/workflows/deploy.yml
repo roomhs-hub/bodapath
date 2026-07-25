@@ -9,7 +9,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: SSH deploy (clone-or-pull + docker compose up -d --build)
+      - name: SSH deploy (clone-or-pull + write .env + docker compose up -d --build)
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.NAS_HOST }}
@@ -28,4 +28,7 @@ jobs:
               git clone "$REPO_URL" "$DEPLOY_PATH"
               cd "$DEPLOY_PATH"
             fi
+            cat > "$DEPLOY_PATH/.env" << 'ENVEOF'
+${{ secrets.ENV_FILE }}
+ENVEOF
             docker compose up -d --build
