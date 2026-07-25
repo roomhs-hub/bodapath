@@ -9,7 +9,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: SSH deploy (git pull + docker compose up -d --build)
+      - name: SSH deploy (clone-or-pull + docker compose up -d --build)
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.NAS_HOST }}
@@ -17,6 +17,15 @@ jobs:
           username: ${{ secrets.NAS_USER }}
           key: ${{ secrets.NAS_SSH_KEY }}
           script: |
-            cd ${{ secrets.NAS_DEPLOY_PATH }}
-            git pull
+            export PATH="/usr/local/bin:/usr/local/sbin:/usr/syno/bin:/var/packages/ContainerManager/target/usr/bin:/var/packages/Docker/target/usr/bin:/var/packages/Git/target/usr/bin:$PATH"
+            REPO_URL="https://github.com/roomhs-hub/bodapath.git"
+            DEPLOY_PATH="${{ secrets.NAS_DEPLOY_PATH }}"
+            if [ -d "$DEPLOY_PATH/.git" ]; then
+              cd "$DEPLOY_PATH"
+              git pull
+            else
+              mkdir -p "$DEPLOY_PATH"
+              git clone "$REPO_URL" "$DEPLOY_PATH"
+              cd "$DEPLOY_PATH"
+            fi
             docker compose up -d --build
