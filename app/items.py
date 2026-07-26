@@ -19,7 +19,13 @@ def _fields_for_form():
 
 def _apply_builtin_field(item, field_key, value):
     if field_key == "last_done_at":
-        item.last_done_at = datetime.strptime(value, "%Y-%m-%d").date() if value else None
+        if value:
+            try:
+                item.last_done_at = datetime.strptime(value, "%Y-%m-%d").date()
+            except ValueError:
+                item.last_done_at = None
+        else:
+            item.last_done_at = None
     else:
         setattr(item, field_key, value or None)
 
@@ -27,6 +33,22 @@ def _apply_builtin_field(item, field_key, value):
 BUILTIN_KEYS = {
     "title", "category", "content", "cycle", "deadline", "prev_owner", "next_owner",
     "submit_to", "contact", "related_url", "priority", "status", "note", "last_done_at",
+}
+
+# HandoverItem의 실제 컬럼 길이 제한(models.py 기준). 초과 입력 시 DB에서
+# StringDataRightTruncation 예외가 발생해 500 에러로 이어지므로, 저장 전에 먼저 검증한다.
+MAX_LENGTHS = {
+    "title": 255,
+    "category": 128,
+    "cycle": 32,
+    "deadline": 255,
+    "prev_owner": 128,
+    "next_owner": 128,
+    "submit_to": 255,
+    "contact": 255,
+    "related_url": 512,
+    "priority": 16,
+    "status": 32,
 }
 
 
@@ -69,6 +91,21 @@ def _validate_required(fields):
             continue
         if not request.form.get(f.field_key, "").strip():
             errors.append(f"{f.label}은(는) 필수 항목입니다.")
+    return errors
+
+
+def _validate_lengths(fields):
+    errors = []
+    for f in fields:
+        max_len = MAX_LENGTHS.get(f.field_key)
+        if not max_len:
+            continue
+        value = request.form.get(f.field_key, "")
+        if len(value) > max_len:
+            errors.append(
+                f"{f.label}은(는) 최대 {max_len}자까지 입력할 수 있습니다. "
+                f"(현재 {len(value)}자)"
+            )
     return errors
 
 
@@ -143,7 +180,7 @@ def new_item():
     fields = _fields_for_form()
 
     if request.method == "POST":
-        errors = _validate_required(fields)
+        errors = _validate_required(fields) + _validate_lengths(fields)
         if errors:
             for e in errors:
                 flash(e)
@@ -177,7 +214,7 @@ def edit_item(item_id):
     fields = _fields_for_form()
 
     if request.method == "POST":
-        errors = _validate_required(fields)
+        errors = _validate_required(fields) + _validate_lengths(fields)
         if errors:
             for e in errors:
                 flash(e)
