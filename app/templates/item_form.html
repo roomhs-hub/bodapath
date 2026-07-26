@@ -36,7 +36,8 @@
       </div>
 
     {% else %}
-      <input type="text" id="f_{{ field.field_key }}" name="{{ field.field_key }}" value="{{ form_values.get(field.field_key, '') }}">
+      {% set max_len = max_lengths.get(field.field_key) %}
+      <input type="text" id="f_{{ field.field_key }}" name="{{ field.field_key }}" value="{{ form_values.get(field.field_key, '') }}"{% if max_len %} maxlength="{{ max_len }}"{% endif %}>
     {% endif %}
   </div>
   {% endfor %}
