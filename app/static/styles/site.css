@@ -9,3 +9,31 @@
 }
 .login-card { width: 100%; max-width: 360px; text-align: center; }
 .login-card h1 { margin-bottom: var(--space-5); }
+
+/* 로그인 화면 하단 BI 로고: 로그인 버튼과 동일 컨테이너 기준 80% 폭 */
+.login-bi-logo {
+  display: block;
+  width: 80%;
+  margin: var(--space-5) auto 0;
+}
+
+/* ===== 필드 관리: 좌측 드롭다운 이동 컨트롤 + 컴팩트 카드 ===== */
+.field-list .card {
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-2);
+}
+.field-list .row { row-gap: var(--space-1); }
+.field-list .card strong { font-size: var(--font-size-base); }
+.field-list .card .caption { margin-top: 2px; }
+.field-move-select {
+  flex: 0 0 auto;
+  width: 84px;
+  min-height: 32px;
+  padding: 2px var(--space-1);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--font-size-caption);
+  cursor: pointer;
+}
