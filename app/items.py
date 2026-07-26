@@ -17,6 +17,17 @@ def _fields_for_form():
     return get_all_fields(enabled_only=True)
 
 
+# models.py에서 nullable=False로 정의된 컬럼 중, 관리자 화면에서는 "필수: 아니오"로
+# 설정할 수 있는 필드들. 관리자가 필수 해제를 하더라도 DB는 NULL을 허용하지 않으므로,
+# 값이 비어있을 때 여기 정의된 대체값(빈 문자열/기본 상태값)을 넣어 NotNullViolation을 방지한다.
+NOT_NULL_DEFAULTS = {
+    "prev_owner": "",
+    "next_owner": "",
+    "submit_to": "",
+    "status": "미확인",
+}
+
+
 def _apply_builtin_field(item, field_key, value):
     if field_key == "last_done_at":
         if value:
@@ -26,6 +37,8 @@ def _apply_builtin_field(item, field_key, value):
                 item.last_done_at = None
         else:
             item.last_done_at = None
+    elif field_key in NOT_NULL_DEFAULTS:
+        setattr(item, field_key, value or NOT_NULL_DEFAULTS[field_key])
     else:
         setattr(item, field_key, value or None)
 
