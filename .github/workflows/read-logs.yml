@@ -1,0 +1,24 @@
+name: Read App Logs (no rebuild)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  read-logs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH read logs (no build, no restart)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.NAS_HOST }}
+          port: ${{ secrets.NAS_PORT }}
+          username: ${{ secrets.NAS_USER }}
+          key: ${{ secrets.NAS_SSH_KEY }}
+          script: |
+            export PATH="/usr/local/bin:/usr/local/sbin:/usr/syno/bin:/var/packages/ContainerManager/target/usr/bin:/var/packages/Docker/target/usr/bin:/var/packages/Git/target/usr/bin:$PATH"
+            DEPLOY_PATH="${{ secrets.NAS_DEPLOY_PATH }}"
+            cd "$DEPLOY_PATH"
+            echo "=== docker compose ps ==="
+            sudo -n docker compose ps
+            echo "=== app container logs (last 500 lines) ==="
+            sudo -n docker compose logs app --tail=500 --no-color
