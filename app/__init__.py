@@ -31,8 +31,10 @@ def create_app(config_class=Config):
         seed_defaults()
 
     from .fields import get_options
+    from .items import MAX_LENGTHS
 
     app.jinja_env.globals["field_options"] = get_options
+    app.jinja_env.globals["max_lengths"] = MAX_LENGTHS
 
     @app.template_filter("dt")
     def format_datetime(value, fmt="%Y-%m-%d %H:%M"):
