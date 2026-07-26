@@ -4,20 +4,23 @@
 <h1>필드 관리</h1>
 <p class="caption">사용/미사용 토글, 필수 여부, 순서를 관리하고 새 필드를 추가할 수 있습니다.</p>
 
+<div class="field-list">
 {% for field in fields %}
 <div class="card">
   <div class="row" style="align-items:center;">
+    <select class="field-move-select" aria-label="{{ field.label }} 순서 이동"
+      onchange="if(this.value){document.getElementById('move-{{ field.field_key }}-'+this.value).submit();} this.selectedIndex=0;">
+      <option value="" selected>⇅ 이동</option>
+      <option value="up">▲ 위로</option>
+      <option value="down">▼ 아래로</option>
+    </select>
+    <form id="move-{{ field.field_key }}-up" method="post" action="{{ url_for('admin.move_field', field_key=field.field_key, direction='up') }}" style="display:none;"></form>
+    <form id="move-{{ field.field_key }}-down" method="post" action="{{ url_for('admin.move_field', field_key=field.field_key, direction='down') }}" style="display:none;"></form>
+
     <div style="flex: 2; min-width: 160px;">
       <strong>{{ field.label }}</strong>
       <div class="caption">{{ field.field_key }} · {{ field_type_labels.get(field.field_type, field.field_type) }}{% if field.is_custom %} · 커스텀{% endif %}</div>
     </div>
-
-    <form method="post" action="{{ url_for('admin.move_field', field_key=field.field_key, direction='up') }}">
-      <button type="submit" class="btn btn-secondary btn-sm">▲</button>
-    </form>
-    <form method="post" action="{{ url_for('admin.move_field', field_key=field.field_key, direction='down') }}">
-      <button type="submit" class="btn btn-secondary btn-sm">▼</button>
-    </form>
 
     <form method="post" action="{{ url_for('admin.toggle_required', field_key=field.field_key) }}">
       <button type="submit" class="btn {{ 'btn-primary' if field.is_required else 'btn-secondary' }} btn-sm">필수: {{ '예' if field.is_required else '아니오' }}</button>
@@ -39,6 +42,7 @@
   </div>
 </div>
 {% endfor %}
+</div>
 
 <div class="card">
   <h2>+ 필드 추가</h2>
