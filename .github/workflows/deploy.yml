@@ -33,20 +33,8 @@ jobs:
               cd "$DEPLOY_PATH"
             fi
             printf '%s' "$ENV_FILE_CONTENT" > "$DEPLOY_PATH/.env"
-            echo "=== DIAG START ==="
-            echo "--- id ---"
-            id
-            echo "--- groups ---"
-            groups
-            echo "--- docker.sock ---"
-            ls -la /var/run/docker.sock || echo "NO_SOCK_AT_PATH"
-            echo "--- getent group docker ---"
-            getent group docker || echo "NO_DOCKER_GROUP"
-            echo "--- sudo -n check ---"
-            sudo -n true && echo "SUDO_NOPASSWD_OK" || echo "SUDO_NOPASSWD_FAILED"
-            echo "--- which docker ---"
-            which docker
-            echo "--- synogroup docker (if exists) ---"
-            synogroup --get docker 2>&1 || echo "NO_SYNOGROUP_DOCKER"
-            echo "=== DIAG END ==="
             sudo -n docker compose up -d --build
+            echo "=== docker compose ps ==="
+            sudo -n docker compose ps
+            echo "=== app container logs (last 300 lines) ==="
+            sudo -n docker compose logs app --tail=300 --no-color
