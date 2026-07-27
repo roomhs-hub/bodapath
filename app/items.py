@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from flask import Blueprint, flash, redirect, render_template, request, session, url_for
+from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 from .auth import login_required
 from .extensions import db
@@ -207,16 +207,12 @@ def new_item():
         db.session.add(item)
         db.session.commit()
 
-        if item.prev_owner:
-            session["default_prev_owner"] = item.prev_owner
-
         flash("등록되었습니다.")
         return redirect(url_for("items.list_items"))
 
-    default_values = {"prev_owner": session.get("default_prev_owner", "")}
     return render_template(
         "item_form.html", fields=fields, item=None, mode="new",
-        form_values=default_values, multiselect_values={},
+        form_values={}, multiselect_values={},
     )
 
 

@@ -189,3 +189,17 @@ details.filter-accordion .filter-body { padding: 0 var(--space-3) var(--space-3)
 .row > * { flex: 1; min-width: 120px; }
 
 .empty-state { text-align: center; color: var(--color-text-muted); padding: var(--space-6) var(--space-4); }
+
+/* ===== 필드 관리: 드래그앤드롭 순서 변경 ===== */
+.drag-handle {
+  cursor: grab;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--color-text-muted);
+  padding: var(--space-2);
+  user-select: none;
+  touch-action: none;
+}
+.drag-handle:active { cursor: grabbing; }
+.field-list .card.is-dragging { opacity: 0.4; }
+.field-list .card { transition: box-shadow 0.15s ease; }

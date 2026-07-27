@@ -1,0 +1,7 @@
+# Local preview only (SQLite-based). PostgreSQL driver (psycopg) and the
+# production WSGI server (gunicorn) are not needed for local preview.
+# Production deploys still use requirements.txt.
+Flask==3.0.3
+Flask-SQLAlchemy==3.1.1
+python-dotenv==1.0.1
+Werkzeug==3.0.3

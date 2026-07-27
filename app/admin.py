@@ -1,7 +1,7 @@
 import csv
 import io
 
-from flask import Blueprint, Response, flash, redirect, render_template, request, url_for
+from flask import Blueprint, Response, flash, jsonify, redirect, render_template, request, url_for
 
 from .auth import login_required
 from .extensions import db
@@ -136,6 +136,24 @@ def move_field(field_key, direction):
     return redirect(url_for("admin.fields"))
 
 
+@bp.route("/fields/reorder", methods=["POST"])
+@login_required
+def reorder_fields():
+    """드래그로 재배열한 필드 순서를 한 번에 저장한다. (노션 스타일 드래그앤드롭)"""
+    payload = request.get_json(silent=True) or {}
+    order = payload.get("order") or request.form.getlist("order[]")
+    if not order:
+        return jsonify({"ok": False, "error": "순서 정보가 없습니다."}), 400
+
+    fields_by_key = {f.field_key: f for f in FieldConfig.query.all()}
+    for i, field_key in enumerate(order):
+        field = fields_by_key.get(field_key)
+        if field:
+            field.sort_order = (i + 1) * 10
+    db.session.commit()
+    return jsonify({"ok": True})
+
+
 @bp.route("/fields/<field_key>/delete", methods=["POST"])
 @login_required
 def delete_field(field_key):
@@ -172,6 +190,20 @@ def new_option(field_key):
         )
         db.session.add(FieldOption(field_key=field_key, value=value, sort_order=max_sort + 10))
         db.session.commit()
+    return redirect(url_for("admin.options", field_key=field_key))
+
+
+@bp.route("/fields/<field_key>/options/<int:option_id>/update", methods=["POST"])
+@login_required
+def update_option(field_key, option_id):
+    opt = FieldOption.query.get_or_404(option_id)
+    value = request.form.get("value", "").strip()
+    if not value:
+        flash("항목명은 비워둘 수 없습니다.")
+        return redirect(url_for("admin.options", field_key=field_key))
+    opt.value = value
+    db.session.commit()
+    flash("변경되었습니다.")
     return redirect(url_for("admin.options", field_key=field_key))
 
 

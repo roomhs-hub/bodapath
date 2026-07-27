@@ -44,5 +44,7 @@
     <a href="{{ url_for('admin.dashboard') }}" class="{{ 'is-active' if request.blueprint == 'admin' }}">관리자</a>
   </nav>
   {% endif %}
+
+  {% block extra_scripts %}{% endblock %}
 </body>
 </html>
