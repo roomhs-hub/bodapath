@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
+from sqlalchemy import case
 
 from .auth import login_required, verify_app_password
 from .extensions import db
@@ -138,6 +139,9 @@ def _multiselect_from_form(fields):
 # 대신 라벨명으로 찾는다.
 LIST_EXTRA_CUSTOM_LABELS = ["업무담당"]
 
+# 리스트 기본 정렬 기준: 중요도(상 > 중 > 하 > 미지정) 순
+PRIORITY_SORT_ORDER = ["상", "중", "하"]
+
 
 def _list_custom_field(label):
     return FieldConfig.query.filter_by(label=label, is_enabled=True).first()
@@ -149,6 +153,27 @@ def _custom_display_value(item, field_key):
     if not raw:
         return ""
     return ", ".join(v for v in raw.split(",") if v)
+
+
+def _priority_sort_case():
+    """중요도 문자열(상/중/하)을 정렬 가능한 순번으로 변환하는 CASE 식."""
+    return case(
+        *[(HandoverItem.priority == value, idx) for idx, value in enumerate(PRIORITY_SORT_ORDER)],
+        else_=len(PRIORITY_SORT_ORDER),
+    )
+
+
+def _filter_by_custom_multivalue(query, field_key, selected_values):
+    """다중선택(콤마 저장)형 커스텀 필드를, 선택된 값 중 하나라도 포함하는 업무로 필터링."""
+    if not field_key or not selected_values:
+        return query
+    selected_set = set(selected_values)
+    matching_item_ids = [
+        cfv.item_id
+        for cfv in CustomFieldValue.query.filter_by(field_key=field_key).all()
+        if selected_set & {v for v in (cfv.value or "").split(",") if v}
+    ]
+    return query.filter(HandoverItem.id.in_(matching_item_ids))
 
 
 def _multiselect_from_item(item, fields):
@@ -173,41 +198,55 @@ def list_items():
     fields = _fields_for_form()
     query = HandoverItem.query.filter(HandoverItem.is_deleted.is_(False))
 
-    category = request.args.get("category") or ""
-    status = request.args.get("status") or ""
-    departments = request.args.getlist("department")
+    duty_field = _list_custom_field("업무담당")
 
+    category = request.args.get("category") or ""
+    priority = request.args.get("priority") or ""
+    cycle = request.args.get("cycle") or ""
+    departments = request.args.getlist("department")
+    duties = request.args.getlist("duty")
+
+    if duty_field:
+        query = _filter_by_custom_multivalue(query, duty_field.field_key, duties)
+    if priority:
+        query = query.filter(HandoverItem.priority == priority)
     if category:
         query = query.filter(HandoverItem.category == category)
-    if status:
-        query = query.filter(HandoverItem.status == status)
+    if cycle:
+        query = query.filter(HandoverItem.cycle == cycle)
     if departments:
         query = query.join(ItemDepartment).filter(ItemDepartment.department.in_(departments))
 
-    query = query.order_by(HandoverItem.updated_at.desc())
+    # 기본 정렬: 중요도(상 > 중 > 하 > 미지정) 순, 동일 중요도 내에서는 최근 수정일 순
+    query = query.order_by(_priority_sort_case().asc(), HandoverItem.updated_at.desc())
 
     page = request.args.get("page", 1, type=int)
     per_page = 20
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
 
-    duty_field = _list_custom_field("업무담당")
     duty_values = {}
+    duty_options = []
     if duty_field:
         duty_values = {
             item.id: _custom_display_value(item, duty_field.field_key)
             for item in pagination.items
         }
+        duty_options = get_options(duty_field.field_key)
 
     return render_template(
         "list.html",
         fields=fields,
         items=pagination.items,
         pagination=pagination,
+        duty_options=duty_options,
+        priority_options=get_options("priority"),
         category_options=get_options("category"),
-        status_options=get_options("status"),
+        cycle_options=get_options("cycle"),
         department_options=get_options("department"),
+        selected_duties=duties,
+        selected_priority=priority,
         selected_category=category,
-        selected_status=status,
+        selected_cycle=cycle,
         selected_departments=departments,
         duty_values=duty_values,
     )

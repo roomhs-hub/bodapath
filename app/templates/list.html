@@ -7,7 +7,29 @@
   <summary>필터</summary>
   <div class="filter-body">
     <form method="get" class="stack">
+      {% if duty_options %}
+      <div class="field" style="margin-bottom:0;">
+        <label>담당자</label>
+        <div class="checkbox-group">
+          {% for opt in duty_options %}
+            <label>
+              <input type="checkbox" name="duty" value="{{ opt.value }}" {{ 'checked' if opt.value in selected_duties }}>
+              <span>{{ opt.value }}</span>
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
       <div class="row">
+        <div class="field" style="margin-bottom:0;">
+          <label>중요도</label>
+          <select name="priority">
+            <option value="">전체</option>
+            {% for opt in priority_options %}
+              <option value="{{ opt.value }}" {{ 'selected' if selected_priority == opt.value }}>{{ opt.value }}</option>
+            {% endfor %}
+          </select>
+        </div>
         <div class="field" style="margin-bottom:0;">
           <label>카테고리</label>
           <select name="category">
@@ -18,11 +40,11 @@
           </select>
         </div>
         <div class="field" style="margin-bottom:0;">
-          <label>진행상태</label>
-          <select name="status">
+          <label>주기</label>
+          <select name="cycle">
             <option value="">전체</option>
-            {% for opt in status_options %}
-              <option value="{{ opt.value }}" {{ 'selected' if selected_status == opt.value }}>{{ opt.value }}</option>
+            {% for opt in cycle_options %}
+              <option value="{{ opt.value }}" {{ 'selected' if selected_cycle == opt.value }}>{{ opt.value }}</option>
             {% endfor %}
           </select>
         </div>
@@ -51,7 +73,7 @@
 <table class="data-table">
   <thead>
     <tr>
-      <th>업무명</th><th>카테고리</th><th>주기</th><th>업무담당</th><th>중요도</th><th>최근 수정일</th><th></th>
+      <th>업무명</th><th>카테고리</th><th>주기</th><th>업무담당</th><th>중요도</th><th></th>
     </tr>
   </thead>
   <tbody>
@@ -62,7 +84,6 @@
       <td>{{ item.cycle }}</td>
       <td><strong>{{ duty_values.get(item.id, '') }}</strong></td>
       <td><strong>{{ item.priority or '' }}</strong></td>
-      <td>{{ item.updated_at|dt }}</td>
       <td>
         <a href="{{ url_for('items.delete_item', item_id=item.id) }}" class="btn btn-danger btn-sm">삭제</a>
       </td>
@@ -84,11 +105,11 @@
 
 <div class="pagination">
   {% if pagination.has_prev %}
-    <a href="{{ url_for('items.list_items', page=pagination.prev_num, category=selected_category, status=selected_status, department=selected_departments) }}">이전</a>
+    <a href="{{ url_for('items.list_items', page=pagination.prev_num, duty=selected_duties, priority=selected_priority, category=selected_category, cycle=selected_cycle, department=selected_departments) }}">이전</a>
   {% endif %}
   <span class="is-active">{{ pagination.page }} / {{ pagination.pages }}</span>
   {% if pagination.has_next %}
-    <a href="{{ url_for('items.list_items', page=pagination.next_num, category=selected_category, status=selected_status, department=selected_departments) }}">다음</a>
+    <a href="{{ url_for('items.list_items', page=pagination.next_num, duty=selected_duties, priority=selected_priority, category=selected_category, cycle=selected_cycle, department=selected_departments) }}">다음</a>
   {% endif %}
 </div>
 {% else %}
