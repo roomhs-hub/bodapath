@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}삭제 확인{% endblock %}
+{% block content %}
+<h1>업무 삭제 확인</h1>
+
+<div class="card">
+  <p><strong>{{ item.title }}</strong> 항목을 삭제하시겠습니까?</p>
+  <p class="caption">삭제해도 데이터는 즉시 지워지지 않고 '삭제됨' 상태로 보관되며, 관리자 &gt; 삭제된 업무 화면에서 다시 확인하거나 복구할 수 있습니다.</p>
+
+  <form method="post" class="stack">
+    <div class="field">
+      <label>암호 확인<span class="required">*</span></label>
+      <input type="password" name="password" required autofocus>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-danger">삭제 확인</button>
+      <a href="{{ url_for('items.list_items') }}" class="btn btn-secondary">취소</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -2,7 +2,7 @@ from datetime import datetime
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
-from .auth import login_required
+from .auth import login_required, verify_app_password
 from .extensions import db
 from .fields import get_all_fields, get_options
 from .models import CustomFieldValue, FieldConfig, HandoverItem, ItemDepartment
@@ -134,6 +134,23 @@ def _multiselect_from_form(fields):
     return {key: request.form.getlist(key) for key in _multiselect_keys(fields)}
 
 
+# 리스트 화면에 표시할 커스텀 필드는 field_key(환경마다 custom_1/2/3 등으로 다를 수 있음)
+# 대신 라벨명으로 찾는다.
+LIST_EXTRA_CUSTOM_LABELS = ["업무담당"]
+
+
+def _list_custom_field(label):
+    return FieldConfig.query.filter_by(label=label, is_enabled=True).first()
+
+
+def _custom_display_value(item, field_key):
+    """커스텀 필드 값(다중선택은 콤마로 저장됨)을 화면 표시용 문자열로 변환."""
+    raw = next((c.value for c in item.custom_values if c.field_key == field_key), "")
+    if not raw:
+        return ""
+    return ", ".join(v for v in raw.split(",") if v)
+
+
 def _multiselect_from_item(item, fields):
     result = {"department": item.department_list}
     custom_values = _custom_values_map(item)
@@ -154,7 +171,7 @@ def index():
 @login_required
 def list_items():
     fields = _fields_for_form()
-    query = HandoverItem.query
+    query = HandoverItem.query.filter(HandoverItem.is_deleted.is_(False))
 
     category = request.args.get("category") or ""
     status = request.args.get("status") or ""
@@ -173,6 +190,14 @@ def list_items():
     per_page = 20
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
 
+    duty_field = _list_custom_field("업무담당")
+    duty_values = {}
+    if duty_field:
+        duty_values = {
+            item.id: _custom_display_value(item, duty_field.field_key)
+            for item in pagination.items
+        }
+
     return render_template(
         "list.html",
         fields=fields,
@@ -184,6 +209,7 @@ def list_items():
         selected_category=category,
         selected_status=status,
         selected_departments=departments,
+        duty_values=duty_values,
     )
 
 
@@ -219,7 +245,7 @@ def new_item():
 @bp.route("/items/<int:item_id>/edit", methods=["GET", "POST"])
 @login_required
 def edit_item(item_id):
-    item = HandoverItem.query.get_or_404(item_id)
+    item = HandoverItem.query.filter_by(id=item_id, is_deleted=False).first_or_404()
     fields = _fields_for_form()
 
     if request.method == "POST":
@@ -248,11 +274,22 @@ def edit_item(item_id):
     )
 
 
-@bp.route("/items/<int:item_id>/delete", methods=["POST"])
+@bp.route("/items/<int:item_id>/delete", methods=["GET", "POST"])
 @login_required
 def delete_item(item_id):
-    item = HandoverItem.query.get_or_404(item_id)
-    db.session.delete(item)
-    db.session.commit()
-    flash("삭제되었습니다.")
-    return redirect(url_for("items.list_items"))
+    """실제로 행을 지우지 않고 is_deleted 플래그만 세운다 (관리자 > 삭제된 업무에서 조회 가능).
+    되돌릴 수 없는 작업이므로 진행 전 사이트 암호 재입력을 요구한다."""
+    item = HandoverItem.query.filter_by(id=item_id, is_deleted=False).first_or_404()
+
+    if request.method == "POST":
+        password = request.form.get("password", "")
+        if not verify_app_password(password):
+            flash("암호가 일치하지 않습니다.")
+            return render_template("confirm_delete.html", item=item)
+
+        item.is_deleted = True
+        db.session.commit()
+        flash("삭제되었습니다. (관리자 > 삭제된 업무에서 복구할 수 있습니다)")
+        return redirect(url_for("items.list_items"))
+
+    return render_template("confirm_delete.html", item=item)

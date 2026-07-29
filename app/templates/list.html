@@ -51,7 +51,7 @@
 <table class="data-table">
   <thead>
     <tr>
-      <th>업무명</th><th>카테고리</th><th>관련자(부서)</th><th>주기</th><th>이후 업무자</th><th>진행상태</th><th>최근 수정일</th><th></th>
+      <th>업무명</th><th>카테고리</th><th>주기</th><th>업무담당</th><th>중요도</th><th>최근 수정일</th><th></th>
     </tr>
   </thead>
   <tbody>
@@ -59,15 +59,12 @@
     <tr>
       <td><a href="{{ url_for('items.edit_item', item_id=item.id) }}">{{ item.title }}</a></td>
       <td>{{ item.category or '' }}</td>
-      <td>{{ item.department_list|join(', ') }}</td>
       <td>{{ item.cycle }}</td>
-      <td>{{ item.next_owner }}</td>
-      <td>{{ item.status }}</td>
+      <td><strong>{{ duty_values.get(item.id, '') }}</strong></td>
+      <td><strong>{{ item.priority or '' }}</strong></td>
       <td>{{ item.updated_at|dt }}</td>
       <td>
-        <form method="post" action="{{ url_for('items.delete_item', item_id=item.id) }}" onsubmit="return confirm('정말 삭제하시겠습니까?');">
-          <button type="submit" class="btn btn-danger btn-sm">삭제</button>
-        </form>
+        <a href="{{ url_for('items.delete_item', item_id=item.id) }}" class="btn btn-danger btn-sm">삭제</a>
       </td>
     </tr>
     {% endfor %}
@@ -79,8 +76,8 @@
   {% for item in items %}
   <a class="list-card-item" href="{{ url_for('items.edit_item', item_id=item.id) }}">
     <div class="title">{{ item.title }}</div>
-    <div class="meta">{{ item.category or '' }} · {{ item.department_list|join(', ') }} · {{ item.cycle }}</div>
-    <div class="meta">이후 업무자: {{ item.next_owner }} · <span class="badge {{ 'badge--done' if item.status == '완료' else ('badge--in-progress' if item.status == '확인중' else 'badge--todo') }}">{{ item.status }}</span></div>
+    <div class="meta">{{ item.category or '' }} · {{ item.cycle }}</div>
+    <div class="meta">업무담당: <strong>{{ duty_values.get(item.id, '') }}</strong> · 중요도: <strong>{{ item.priority or '' }}</strong></div>
   </a>
   {% endfor %}
 </div>

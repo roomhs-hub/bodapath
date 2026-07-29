@@ -19,7 +19,7 @@ def search():
     next_owner = request.args.get("next_owner", "").strip()
     departments = request.args.getlist("department")
 
-    query = HandoverItem.query
+    query = HandoverItem.query.filter(HandoverItem.is_deleted.is_(False))
 
     if keyword:
         like = f"%{keyword}%"

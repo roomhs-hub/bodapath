@@ -21,6 +21,11 @@ def _password_hash():
     return generate_password_hash(current_app.config["APP_PASSWORD"])
 
 
+def verify_app_password(password):
+    """로그인 암호와 동일한 사이트 암호를 검증한다 (예: 업무 삭제 시 재확인용)."""
+    return check_password_hash(_password_hash(), password or "")
+
+
 @bp.route("/login", methods=["GET", "POST"])
 def login():
     if session.get("logged_in"):

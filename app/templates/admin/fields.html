@@ -29,13 +29,44 @@
     {% endif %}
 
     {% if field.is_custom %}
-      <form method="post" action="{{ url_for('admin.delete_field', field_key=field.field_key) }}" onsubmit="return confirm('이 필드를 삭제하면 저장된 값도 함께 사라집니다. 계속할까요?');">
+      <form method="post" action="{{ url_for('admin.delete_field', field_key=field.field_key) }}" onsubmit="return confirm('이 필드를 삭제하시겠습니까? 데이터는 사라지지 않으며, 아래 \'삭제된 필드\' 목록에서 검색해 다시 사용할 수 있습니다.');">
         <button type="submit" class="btn btn-danger btn-sm">삭제</button>
       </form>
     {% endif %}
   </div>
 </div>
 {% endfor %}
+</div>
+
+<div class="card">
+  <h2>삭제된 필드</h2>
+  <p class="caption">삭제된 필드는 데이터가 사라지지 않고 여기 보관됩니다. 검색해서 다시 사용(복구)할 수 있습니다.</p>
+
+  {% if deleted_fields %}
+  <div class="field">
+    <label>필드명 검색</label>
+    <input type="text" id="deleted-field-search" placeholder="삭제된 필드명으로 검색...">
+  </div>
+
+  <div id="deleted-field-list">
+    {% for field in deleted_fields %}
+    <div class="row deleted-field-row" data-label="{{ field.label|lower }}" style="align-items:center;">
+      <div style="flex: 2; min-width: 160px;">
+        <strong>{{ field.label }}</strong>
+        <div class="caption">{{ field.field_key }} · {{ field_type_labels.get(field.field_type, field.field_type) }}</div>
+      </div>
+
+      <form method="post" action="{{ url_for('admin.restore_field', field_key=field.field_key) }}">
+        <button type="submit" class="btn btn-secondary btn-sm">재사용(복구)</button>
+      </form>
+    </div>
+    {% endfor %}
+  </div>
+
+  <p class="caption" id="deleted-field-empty" style="display:none;">검색 결과가 없습니다.</p>
+  {% else %}
+  <p class="caption">삭제된 필드가 없습니다.</p>
+  {% endif %}
 </div>
 
 <div class="card">
@@ -133,6 +164,24 @@
     } else {
       list.insertBefore(dragEl, afterElement);
     }
+  });
+})();
+
+(function () {
+  var searchInput = document.getElementById('deleted-field-search');
+  if (!searchInput) return;
+  var rows = Array.prototype.slice.call(document.querySelectorAll('.deleted-field-row'));
+  var emptyMsg = document.getElementById('deleted-field-empty');
+
+  searchInput.addEventListener('input', function () {
+    var q = searchInput.value.trim().toLowerCase();
+    var visibleCount = 0;
+    rows.forEach(function (row) {
+      var match = !q || row.dataset.label.indexOf(q) !== -1;
+      row.style.display = match ? '' : 'none';
+      if (match) visibleCount++;
+    });
+    if (emptyMsg) emptyMsg.style.display = (q && visibleCount === 0) ? '' : 'none';
   });
 })();
 </script>

@@ -17,6 +17,9 @@ class FieldConfig(db.Model):
     is_enabled = db.Column(db.Boolean, nullable=False, default=True)
     is_custom = db.Column(db.Boolean, nullable=False, default=False)
     sort_order = db.Column(db.Integer, nullable=False, default=0)
+    # 삭제 플래그: 실제로 행을 지우지 않고 이 값만 True로 바꾼다.
+    # (필드관리 화면 내 필터에서 검색해 다시 사용(복구)할 수 있다.)
+    is_deleted = db.Column(db.Boolean, nullable=False, default=False)
 
     options = db.relationship(
         "FieldOption",
@@ -63,6 +66,8 @@ class HandoverItem(db.Model):
     status = db.Column(db.String(32), nullable=False, default="미확인")
     note = db.Column(db.Text)
     last_done_at = db.Column(db.Date)
+    # 삭제 플래그: 실제로 행을 지우지 않고 이 값만 True로 바꾼다 (관리자 화면에서 별도 조회 가능).
+    is_deleted = db.Column(db.Boolean, nullable=False, default=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(
         db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow

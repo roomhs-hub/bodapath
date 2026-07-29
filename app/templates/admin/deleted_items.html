@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}삭제된 업무{% endblock %}
+{% block content %}
+<h1>삭제된 업무</h1>
+<p class="caption">실제로 지워지지 않고 '삭제됨' 표시만 된 업무 목록입니다. 필요하면 복구할 수 있습니다.</p>
+<p><a href="{{ url_for('admin.dashboard') }}">&larr; 관리자 화면으로 돌아가기</a></p>
+
+{% if items %}
+<div class="card">
+  {% for item in items %}
+  <div class="row" style="align-items:center; margin-bottom: var(--space-2);">
+    <div style="flex:2;">
+      <strong>{{ item.title }}</strong>
+      <div class="caption">{{ item.category or '' }} · {{ item.cycle }} · 최근 수정일 {{ item.updated_at|dt }}</div>
+    </div>
+    <form method="post" action="{{ url_for('admin.restore_item', item_id=item.id) }}">
+      <button type="submit" class="btn btn-secondary btn-sm">복구</button>
+    </form>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">삭제된 업무가 없습니다.</div>
+{% endif %}
+{% endblock %}
