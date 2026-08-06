@@ -82,7 +82,10 @@ def _save_item_from_form(item, fields):
 
         if key in BUILTIN_KEYS:
             _apply_builtin_field(item, key, value)
-        elif f.is_custom:
+        else:
+            # HandoverItem에 실제 컬럼이 없는 필드(관리자가 추가한 커스텀 필드 +
+            # "인수자"처럼 나중에 추가된, 컬럼 없는 기본 필드 포함)는 모두
+            # CustomFieldValue에 저장한다.
             existing = next((c for c in item.custom_values if c.field_key == key), None)
             if existing:
                 existing.value = value

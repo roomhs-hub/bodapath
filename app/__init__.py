@@ -58,9 +58,10 @@ def create_app(config_class=Config):
     with app.app_context():
         db.create_all()
         _migrate_add_missing_columns()
-        from .seed import seed_defaults
+        from .seed import ensure_default_fields, seed_defaults
 
         seed_defaults()
+        ensure_default_fields()
 
     from .fields import get_options
     from .items import MAX_LENGTHS

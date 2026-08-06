@@ -16,6 +16,7 @@ DEFAULT_FIELDS = [
     ("related_url", "관련 시스템/URL", "text", False, 110),
     ("priority", "중요도", "select", False, 120),
     ("status", "인수인계 진행 상태", "select", True, 130),
+    ("successor", "인수자", "multiselect", False, 135),
     ("note", "특이사항/주의사항", "textarea", False, 140),
     ("last_done_at", "최근 수행일", "date", False, 150),
 ]
@@ -56,3 +57,34 @@ def seed_defaults():
 
     db.session.commit()
     return True
+
+
+def ensure_default_fields():
+    """이미 운영 중인(필드가 이미 채워진) DB에도, 이후 세션에서 DEFAULT_FIELDS에
+    새로 추가된 기본 필드가 있으면 누락분만 추가한다 (idempotent).
+    완전 신규 설치는 seed_defaults()가 DEFAULT_FIELDS 전체를 이미 생성하므로 건너뛴다."""
+    if FieldConfig.query.first() is None:
+        return False
+
+    existing_keys = {row[0] for row in db.session.query(FieldConfig.field_key).all()}
+    added = False
+
+    for field_key, label, field_type, is_required, sort_order in DEFAULT_FIELDS:
+        if field_key in existing_keys:
+            continue
+        db.session.add(
+            FieldConfig(
+                field_key=field_key,
+                label=label,
+                field_type=field_type,
+                is_required=is_required,
+                is_enabled=True,
+                is_custom=False,
+                sort_order=sort_order,
+            )
+        )
+        added = True
+
+    if added:
+        db.session.commit()
+    return added
